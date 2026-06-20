@@ -1,4 +1,4 @@
-# Lutra Fullstack Template
+# Fullstack Template
 
 一个干净的前后端基础框架模板，适合从零开发新的小程序、H5 和微服务项目。
 
