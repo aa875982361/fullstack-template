@@ -63,10 +63,15 @@ jobs:
       - name: Configure SSH key
         env:
           TEST_SSH_PRIVATE_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
         run: |
+          test -n "$TEST_SSH_PRIVATE_KEY"
           mkdir -p ~/.ssh
-          printf '%s' "$TEST_SSH_PRIVATE_KEY" | sed 's/\\n/\n/g' > ~/.ssh/deploy_key
+          printf '%s' "$TEST_SSH_PRIVATE_KEY" | sed 's/\\n/\n/g' | tr -d '\r' > ~/.ssh/deploy_key
+          printf '\n' >> ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null
+          ssh-keyscan -T 10 -H "$SERVER_HOST" >> ~/.ssh/known_hosts || true
 
       - name: Deploy test backend and run database patches
         working-directory: server
