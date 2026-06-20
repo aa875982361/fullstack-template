@@ -16,6 +16,7 @@ jobs:
       VERSION: test-${{ github.run_number }}-${{ github.sha }}
       IMAGE_REGISTRY: ${{ secrets.IMAGE_REGISTRY || 'ghcr.io' }}
       IMAGE_NAMESPACE: ${{ secrets.IMAGE_NAMESPACE || github.repository_owner }}
+      WX_APPID: ${{ secrets.WX_APPID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +33,7 @@ jobs:
         run: npm ci --legacy-peer-deps && npm run build:h5:online && npm run build:weapp
 
       - name: Write WeChat upload key
+        if: ${{ env.WX_APPID != '' }}
         env:
           WX_PRIVATE_KEY: ${{ secrets.WX_PRIVATE_KEY }}
         run: |
@@ -40,9 +42,9 @@ jobs:
           chmod 600 "$RUNNER_TEMP/wx/private.key"
 
       - name: Upload WeChat trial build
+        if: ${{ env.WX_APPID != '' }}
         working-directory: frontend
         env:
-          WX_APPID: ${{ secrets.WX_APPID }}
           WX_PRIVATE_KEY_PATH: ${{ runner.temp }}/wx/private.key
           WX_ROBOT: ${{ secrets.WX_ROBOT || '1' }}
           CI_VERSION: ${{ env.VERSION }}
