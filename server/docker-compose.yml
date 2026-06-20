@@ -1,6 +1,16 @@
 name: lutra-template
 
 services:
+  h5:
+    build:
+      context: ../frontend
+    image: ${H5_IMAGE:-${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/h5:${IMAGE_TAG:-local}}
+    restart: unless-stopped
+    ports:
+      - "${H5_HTTP_PORT:-10086}:80"
+    environment:
+      TZ: Asia/Shanghai
+
   kong:
     image: ${KONG_IMAGE:-kong:2.8.1}
     restart: unless-stopped

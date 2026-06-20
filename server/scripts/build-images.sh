@@ -5,11 +5,11 @@ set -euo pipefail
 VERSION="${VERSION:-}"
 REGISTRY="${IMAGE_REGISTRY:-${REGISTRY:-ghcr.io}}"
 NAMESPACE="${IMAGE_NAMESPACE:-${NAMESPACE:-lutra-template}}"
-SERVICES="${SERVICES:-api-service,deepseek-service}"
+SERVICES="${SERVICES:-api-service,deepseek-service,h5}"
 PUSH=false
 
 usage() {
-  echo "Usage: $0 --version <tag> [--services api-service,deepseek-service] [--push]"
+  echo "Usage: $0 --version <tag> [--services api-service,deepseek-service,h5] [--push]"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -53,7 +53,11 @@ IFS=',' read -ra SERVICE_LIST <<< "$SERVICES"
 for service in "${SERVICE_LIST[@]}"; do
   image="$REGISTRY/$NAMESPACE/$service:$VERSION"
   echo "Building $image"
-  docker build -t "$image" "./$service"
+  if [[ "$service" == "h5" ]]; then
+    docker build -t "$image" "../frontend"
+  else
+    docker build -t "$image" "./$service"
+  fi
 
   if [[ "$PUSH" == "true" ]]; then
     echo "Pushing $image"

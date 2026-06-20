@@ -9,9 +9,10 @@ SERVER_PATH="${SERVER_PATH:-/opt/lutra-fullstack-template/server}"
 SSH_KEY_PATH="${SSH_KEY_PATH:-}"
 REGISTRY="${IMAGE_REGISTRY:-ghcr.io}"
 NAMESPACE="${IMAGE_NAMESPACE:-lutra-template}"
+H5_HTTP_PORT="${H5_HTTP_PORT:-10086}"
 
 usage() {
-  echo "Usage: $0 --version <tag> --host <host> --ssh-key <path> [--user root] [--path /opt/app/server]"
+  echo "Usage: $0 --version <tag> --host <host> --ssh-key <path> [--user root] [--path /opt/app/server] [--h5-port 10086]"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -34,6 +35,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --ssh-key)
       SSH_KEY_PATH="$2"
+      shift 2
+      ;;
+    --h5-port)
+      H5_HTTP_PORT="$2"
       shift 2
       ;;
     -h|--help)
@@ -72,6 +77,7 @@ ssh "${SSH_OPTS[@]}" "$REMOTE" "
   export IMAGE_REGISTRY='$REGISTRY'
   export IMAGE_NAMESPACE='$NAMESPACE'
   export IMAGE_TAG='$VERSION'
+  export H5_HTTP_PORT='$H5_HTTP_PORT'
   docker compose pull
   docker compose up -d --remove-orphans
   chmod +x scripts/run-db-patches.sh

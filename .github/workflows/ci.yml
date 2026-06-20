@@ -54,4 +54,4 @@ jobs:
         run: npm install && npm test
       - name: Build Docker images
         working-directory: server
-        run: bash scripts/build-images.sh --version "ci-${{ github.sha }}"
+        run: bash scripts/build-images.sh --version "ci-${{ github.sha }}" --services api-service,deepseek-service

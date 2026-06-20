@@ -19,7 +19,12 @@
 ```bash
 node scripts/create-local-env.mjs
 
-cd server
+cd frontend
+npm install --legacy-peer-deps
+npm run build:h5:online
+npm run build:weapp
+
+cd ../server
 docker compose up -d --build
 scripts/run-db-patches.sh
 API_BASE_URL="http://127.0.0.1:$(docker compose port kong 8000 | sed 's/.*://')"
@@ -27,11 +32,6 @@ curl "$API_BASE_URL/api/health"
 curl -X POST "$API_BASE_URL/deepseek/v1/chat" \
   -H 'content-type: application/json' \
   -d '{"message":"hello"}'
-
-cd ../frontend
-npm install --legacy-peer-deps
-npm run build:h5
-npm run build:weapp
 ```
 
 ## Branch Flow

@@ -22,6 +22,7 @@ Test:
 - `TEST_SERVER_USER`
 - `TEST_SERVER_PATH`
 - `TEST_SSH_PRIVATE_KEY`
+- `TEST_H5_HTTP_PORT`
 
 Production:
 
@@ -42,9 +43,11 @@ Mini program:
 - Docker Compose v2
 - SSH access for the GitHub Actions deploy key
 
-The remote deploy script uploads compose files and pulls images from the configured registry.
+The remote deploy script uploads compose files and pulls backend and H5 images from the configured registry.
 It also uploads `server/volumes`, including Kong and database initialization files required by Supabase.
 After containers are started, it automatically runs `server/scripts/run-db-patches.sh`.
+
+For test deploys, the H5 frontend is served by the `h5` container at `http://<TEST_SERVER_HOST>:<TEST_H5_HTTP_PORT>`.
 
 Production checklist:
 
