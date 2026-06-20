@@ -1,0 +1,51 @@
+{
+  "name": "lutra-template-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Taro React frontend for the Lutra fullstack template.",
+  "scripts": {
+    "build:weapp": "taro build --type weapp",
+    "build:h5": "taro build --type h5",
+    "build:h5:online": "npm run build:h5 && rm -rf html && cp -r dist html",
+    "dev:weapp": "npm run build:weapp -- --watch",
+    "dev:h5": "npm run build:h5 -- --watch",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "test": "echo \"No frontend tests yet\"",
+    "upload:weapp:ci": "node ./scripts/upload-weapp.mjs"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.24.0",
+    "@tarojs/components": "4.1.7",
+    "@tarojs/helper": "4.1.7",
+    "@tarojs/plugin-framework-react": "4.1.7",
+    "@tarojs/plugin-platform-h5": "4.1.7",
+    "@tarojs/plugin-platform-weapp": "4.1.7",
+    "@tarojs/react": "4.1.7",
+    "@tarojs/runtime": "4.1.7",
+    "@tarojs/shared": "4.1.7",
+    "@tarojs/taro": "4.1.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
+    "@tarojs/cli": "4.1.7",
+    "@tarojs/taro-loader": "4.1.7",
+    "@tarojs/webpack5-runner": "4.1.7",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/webpack-env": "^1.18.0",
+    "babel-preset-taro": "4.1.7",
+    "eslint": "^8.57.0",
+    "eslint-config-taro": "4.1.7",
+    "miniprogram-ci": "2.1.35",
+    "typescript": "^5.4.0",
+    "webpack": "5.91.0"
+  },
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 5",
+    "iOS >= 10"
+  ]
+}

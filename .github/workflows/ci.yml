@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - test
+      - main
+  push:
+    branches:
+      - feature/**
+      - chore/**
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps
+      - name: Build H5
+        working-directory: frontend
+        env:
+          TARO_APP_API_BASE_URL: http://127.0.0.1:3000
+          TARO_APP_H5_BASE_URL: http://127.0.0.1:10086
+        run: npm run build:h5
+      - name: Build WeChat mini program
+        working-directory: frontend
+        env:
+          TARO_APP_API_BASE_URL: http://127.0.0.1:3000
+          TARO_APP_H5_BASE_URL: http://127.0.0.1:10086
+        run: npm run build:weapp
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Test api-service
+        working-directory: server/api-service
+        run: npm install && npm test
+      - name: Test deepseek-service
+        working-directory: server/deepseek-service
+        run: npm install && npm test
+      - name: Build Docker images
+        working-directory: server
+        run: bash scripts/build-images.sh --version "ci-${{ github.sha }}"

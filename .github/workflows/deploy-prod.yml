@@ -1,0 +1,76 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: prod-${{ github.run_number }}-${{ github.sha }}
+      IMAGE_REGISTRY: ${{ secrets.IMAGE_REGISTRY || 'ghcr.io' }}
+      IMAGE_NAMESPACE: ${{ secrets.IMAGE_NAMESPACE || github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          TARO_APP_API_BASE_URL: ${{ secrets.PROD_API_BASE_URL }}
+          TARO_APP_H5_BASE_URL: ${{ secrets.PROD_H5_BASE_URL }}
+        run: npm ci --legacy-peer-deps && npm run build:h5:online && npm run build:weapp
+
+      - name: Write WeChat upload key
+        env:
+          WX_PRIVATE_KEY: ${{ secrets.WX_PRIVATE_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/wx"
+          printf '%s' "$WX_PRIVATE_KEY" > "$RUNNER_TEMP/wx/private.key"
+          chmod 600 "$RUNNER_TEMP/wx/private.key"
+
+      - name: Upload WeChat production build
+        working-directory: frontend
+        env:
+          WX_APPID: ${{ secrets.WX_APPID }}
+          WX_PRIVATE_KEY_PATH: ${{ runner.temp }}/wx/private.key
+          WX_ROBOT: ${{ secrets.WX_ROBOT || '2' }}
+          CI_VERSION: ${{ env.VERSION }}
+          CI_DESC: "prod: ${{ github.sha }} by ${{ github.actor }}"
+        run: npm run upload:weapp:ci
+
+      - name: Login image registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GITHUB_TOKEN" | docker login "$IMAGE_REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build and push backend images
+        working-directory: server
+        run: bash scripts/build-images.sh --version "$VERSION" --push
+
+      - name: Configure SSH key
+        env:
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$PROD_SSH_PRIVATE_KEY" | sed 's/\\n/\n/g' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Deploy production backend
+        working-directory: server
+        env:
+          SERVER_HOST: ${{ secrets.PROD_SERVER_HOST }}
+          SERVER_USER: ${{ secrets.PROD_SERVER_USER || 'root' }}
+          SERVER_PATH: ${{ secrets.PROD_SERVER_PATH || '/opt/lutra-fullstack-template/server' }}
+          SSH_KEY_PATH: ~/.ssh/deploy_key
+        run: bash scripts/remote-deploy.sh --version "$VERSION" --host "$SERVER_HOST" --user "$SERVER_USER" --path "$SERVER_PATH" --ssh-key "$SSH_KEY_PATH"
