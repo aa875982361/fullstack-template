@@ -9,9 +9,10 @@
 - `server/deepseek-service/`: 示例 AI 微服务，没有配置 API Key 时自动返回 mock 结果。
 - `server/volumes/api/kong.yml`: Kong 网关，统一暴露 Supabase 和业务服务。
 - Supabase self-hosted services: Kong, Auth, REST, Realtime, Storage, Postgres.
+- `server/scripts/run-db-patches.sh`: 自动执行可重复运行的数据库补丁。
 - `server/docker-compose.yml`: 本地和服务器通用的服务编排。
 - `.github/workflows/`: PR 检查、测试环境部署、生产环境部署骨架。
-- `docs/`: 开发、部署、小程序上传和微服务扩展说明。
+- `docs/`: 开发、部署、数据库补丁、小程序上传和微服务扩展说明。
 
 ## Quick Start
 
@@ -20,6 +21,7 @@ node scripts/create-local-env.mjs
 
 cd server
 docker compose up -d --build
+scripts/run-db-patches.sh
 curl http://127.0.0.1:8000/api/health
 curl http://127.0.0.1:3021/health
 

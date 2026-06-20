@@ -44,9 +44,11 @@ Mini program:
 
 The remote deploy script uploads compose files and pulls images from the configured registry.
 It also uploads `server/volumes`, including Kong and database initialization files required by Supabase.
+After containers are started, it automatically runs `server/scripts/run-db-patches.sh`.
 
 Production checklist:
 
 - Replace all development Supabase secrets from `.env.example`.
 - Keep the remote `server/.env` out of Git.
 - Point frontend builds at the Kong gateway URL, not a direct service port.
+- Keep every SQL patch idempotent. See `docs/db-patches.md`.

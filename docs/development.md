@@ -28,6 +28,13 @@ curl -X POST http://127.0.0.1:8000/deepseek/v1/chat \
   -d '{"message":"hello"}'
 ```
 
+Run database patches manually:
+
+```bash
+cd server
+scripts/run-db-patches.sh
+```
+
 ## Frontend
 
 ```bash
