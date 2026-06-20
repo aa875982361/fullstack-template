@@ -11,6 +11,8 @@ const app = express()
 const port = Number(process.env.PORT || process.env.API_PORT || 3000)
 const deepseekServiceUrl =
   process.env.DEEPSEEK_SERVICE_URL || 'http://127.0.0.1:3021'
+const imageServiceUrl =
+  process.env.IMAGE_SERVICE_URL || 'http://127.0.0.1:3022'
 
 app.use(helmet())
 app.use(compression())
@@ -35,14 +37,35 @@ app.get('/api/ping', (req, res) => {
 
 app.post('/api/deepseek/chat', async (req, res, next) => {
   try {
+    const authorization = req.get('authorization')
     const response = await fetch(`${deepseekServiceUrl}/api/deepseek/chat`, {
       method: 'POST',
       headers: {
+        ...(authorization ? { authorization } : {}),
         'content-type': 'application/json',
       },
       body: JSON.stringify({
         message: req.body?.message,
       }),
+    })
+
+    const data = await response.json()
+    res.status(response.status).json(data)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post('/api/images/generations', async (req, res, next) => {
+  try {
+    const authorization = req.get('authorization')
+    const response = await fetch(`${imageServiceUrl}/api/images/generations`, {
+      method: 'POST',
+      headers: {
+        ...(authorization ? { authorization } : {}),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(req.body || {}),
     })
 
     const data = await response.json()

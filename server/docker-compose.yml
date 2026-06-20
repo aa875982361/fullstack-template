@@ -42,6 +42,8 @@ services:
         condition: service_healthy
       api-service:
         condition: service_healthy
+      image-service:
+        condition: service_healthy
 
   auth:
     image: ${SUPABASE_AUTH_IMAGE:-supabase/gotrue:v2.180.0}
@@ -201,12 +203,15 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
       DEEPSEEK_SERVICE_URL: http://deepseek-service:3021
+      IMAGE_SERVICE_URL: http://image-service:3022
       SUPABASE_URL: http://kong:8000
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
     depends_on:
       deepseek-service:
+        condition: service_healthy
+      image-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -231,6 +236,28 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3021/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  image-service:
+    build:
+      context: ./image-service
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
+    image: ${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/image-service:${IMAGE_TAG:-local}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3022
+      ARK_API_KEY: ${ARK_API_KEY:-}
+      ARK_IMAGE_BASE_URL: ${ARK_IMAGE_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
+      ARK_IMAGE_MODEL: ${ARK_IMAGE_MODEL:-doubao-seedream-5-0-260128}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3022/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

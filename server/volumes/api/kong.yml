@@ -169,3 +169,13 @@ services:
     plugins:
       - name: cors
 
+  - name: images-v1
+    url: http://image-service:3022/api/images/
+    routes:
+      - name: images-v1-all
+        strip_path: true
+        paths:
+          - /images/v1/
+    plugins:
+      - name: cors
+

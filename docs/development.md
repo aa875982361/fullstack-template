@@ -14,6 +14,7 @@ Service URLs:
 - Kong gateway: `$API_BASE_URL`
 - API service: `$API_BASE_URL/api`
 - DeepSeek example service: `$API_BASE_URL/deepseek/v1`
+- Image generation service: `$API_BASE_URL/images/v1`
 - Supabase REST: `$API_BASE_URL/rest/v1`
 - Supabase Auth: `$API_BASE_URL/auth/v1`
 - Supabase Storage: `$API_BASE_URL/storage/v1`
@@ -25,8 +26,13 @@ API_BASE_URL="http://127.0.0.1:$(docker compose port kong 8000 | sed 's/.*://')"
 curl "$API_BASE_URL/api/health"
 curl "$API_BASE_URL/api/ping"
 curl -X POST "$API_BASE_URL/deepseek/v1/chat" \
+  -H 'authorization: Bearer <access-token>' \
   -H 'content-type: application/json' \
   -d '{"message":"hello"}'
+curl -X POST "$API_BASE_URL/images/v1/generations" \
+  -H 'authorization: Bearer <access-token>' \
+  -H 'content-type: application/json' \
+  -d '{"prompt":"星际穿越，黑洞，复古列车，电影大片"}'
 ```
 
 Run database patches manually:
