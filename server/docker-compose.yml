@@ -1,6 +1,16 @@
 name: lutra-template
 
 services:
+  h5:
+    image: ${H5_IMAGE:-nginx:1.27-alpine}
+    restart: unless-stopped
+    ports:
+      - "${H5_HTTP_PORT:-10086}:80"
+    volumes:
+      - ./frontend/html:/usr/share/nginx/html:ro
+    environment:
+      TZ: Asia/Shanghai
+
   kong:
     image: ${KONG_IMAGE:-kong:2.8.1}
     restart: unless-stopped

@@ -80,4 +80,5 @@ jobs:
           SERVER_USER: ${{ secrets.TEST_SERVER_USER || 'root' }}
           SERVER_PATH: ${{ secrets.TEST_SERVER_PATH || '/opt/lutra-fullstack-template/server' }}
           SSH_KEY_PATH: ~/.ssh/deploy_key
-        run: bash scripts/remote-deploy.sh --version "$VERSION" --host "$SERVER_HOST" --user "$SERVER_USER" --path "$SERVER_PATH" --ssh-key "$SSH_KEY_PATH"
+          H5_HTTP_PORT: ${{ vars.TEST_H5_HTTP_PORT || secrets.TEST_H5_HTTP_PORT || '10086' }}
+        run: bash scripts/remote-deploy.sh --version "$VERSION" --host "$SERVER_HOST" --user "$SERVER_USER" --path "$SERVER_PATH" --ssh-key "$SSH_KEY_PATH" --h5-port "$H5_HTTP_PORT"
