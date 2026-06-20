@@ -31,12 +31,14 @@ jobs:
         env:
           TARO_APP_API_BASE_URL: http://127.0.0.1:8000
           TARO_APP_H5_BASE_URL: http://127.0.0.1:10086
+          TARO_APP_SUPABASE_ANON_KEY: ci-placeholder
         run: npm run build:h5
       - name: Build WeChat mini program
         working-directory: frontend
         env:
           TARO_APP_API_BASE_URL: http://127.0.0.1:8000
           TARO_APP_H5_BASE_URL: http://127.0.0.1:10086
+          TARO_APP_SUPABASE_ANON_KEY: ci-placeholder
         run: npm run build:weapp
 
   backend:
