@@ -129,7 +129,7 @@ export async function pingApi() {
 }
 
 export async function sendDeepSeekMessage(message: string) {
-  return requestApi('/api/deepseek/chat', {
+  return requestApi('/deepseek/v1/chat', {
     method: 'POST',
     header: {
       'content-type': 'application/json',
