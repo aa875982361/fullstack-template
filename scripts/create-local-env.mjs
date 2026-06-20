@@ -42,17 +42,20 @@ const jwtSecret = secret(48)
 const postgresPassword = secret(24)
 const dashboardPassword = secret(18)
 const secretKeyBase = secret(64)
+const anonKey = signJwt(jwtSecret, 'anon')
+const serviceRoleKey = signJwt(jwtSecret, 'service_role')
 
 let env = readFileSync(templatePath, 'utf8')
 env = env
   .replace(/^POSTGRES_PASSWORD=.*$/m, `POSTGRES_PASSWORD=${postgresPassword}`)
   .replace(/^JWT_SECRET=.*$/m, `JWT_SECRET=${jwtSecret}`)
-  .replace(/^ANON_KEY=.*$/m, `ANON_KEY=${signJwt(jwtSecret, 'anon')}`)
-  .replace(
-    /^SERVICE_ROLE_KEY=.*$/m,
-    `SERVICE_ROLE_KEY=${signJwt(jwtSecret, 'service_role')}`,
-  )
+  .replace(/^ANON_KEY=.*$/m, `ANON_KEY=${anonKey}`)
+  .replace(/^SERVICE_ROLE_KEY=.*$/m, `SERVICE_ROLE_KEY=${serviceRoleKey}`)
   .replace(/^DASHBOARD_PASSWORD=.*$/m, `DASHBOARD_PASSWORD=${dashboardPassword}`)
+  .replace(
+    /^TARO_APP_SUPABASE_ANON_KEY=.*$/m,
+    `TARO_APP_SUPABASE_ANON_KEY=${anonKey}`,
+  )
   .replace(/^SECRET_KEY_BASE=.*$/m, `SECRET_KEY_BASE=${secretKeyBase}`)
 
 mkdirSync(dirname(outputPath), { recursive: true })

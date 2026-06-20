@@ -1,10 +1,17 @@
 import { useState } from 'react'
+import Taro from '@tarojs/taro'
 import { Button, Input, Text, View } from '@tarojs/components'
-import { pingApi, sendDeepSeekMessage } from '../../services/api'
+import {
+  clearAccessToken,
+  hasAccessToken,
+  pingApi,
+  sendDeepSeekMessage,
+} from '../../services/api'
 
 export default function Index() {
   const [message, setMessage] = useState('hello')
   const [result, setResult] = useState('Ready')
+  const [isLoggedIn, setIsLoggedIn] = useState(hasAccessToken())
 
   async function handlePing() {
     try {
@@ -24,6 +31,16 @@ export default function Index() {
     }
   }
 
+  function handleLogin() {
+    Taro.navigateTo({ url: '/pages/login/index' })
+  }
+
+  function handleLogout() {
+    clearAccessToken()
+    setIsLoggedIn(false)
+    setResult('已退出登录')
+  }
+
   return (
     <View className='min-h-screen bg-neutral-50 px-5 py-8 font-sans text-neutral-700'>
       <View className='mb-7'>
@@ -41,6 +58,12 @@ export default function Index() {
           onClick={handlePing}
         >
           Ping API
+        </Button>
+        <Button
+          className='m-0 h-10 rounded-md border border-neutral-200 bg-white px-4 text-sm leading-10 text-neutral-700'
+          onClick={isLoggedIn ? handleLogout : handleLogin}
+        >
+          {isLoggedIn ? '退出登录' : '邮箱登录'}
         </Button>
       </View>
 

@@ -29,6 +29,9 @@ export default defineConfig<'webpack5'>(async () => {
       'process.env.TARO_APP_H5_BASE_URL': JSON.stringify(
         process.env.TARO_APP_H5_BASE_URL || '',
       ),
+      'process.env.TARO_APP_SUPABASE_ANON_KEY': JSON.stringify(
+        process.env.TARO_APP_SUPABASE_ANON_KEY || process.env.ANON_KEY || '',
+      ),
     },
     mini: {
       webpackChain(chain) {
