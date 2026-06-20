@@ -187,8 +187,6 @@ services:
         NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
     image: ${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/api-service:${IMAGE_TAG:-local}
     restart: unless-stopped
-    ports:
-      - "${API_PORT:-3000}:3000"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
@@ -213,8 +211,6 @@ services:
         NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
     image: ${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/deepseek-service:${IMAGE_TAG:-local}
     restart: unless-stopped
-    ports:
-      - "${DEEPSEEK_PORT:-3021}:3021"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3021

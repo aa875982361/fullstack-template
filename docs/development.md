@@ -6,24 +6,25 @@
 node scripts/create-local-env.mjs
 cd server
 docker compose up -d --build
+API_BASE_URL="http://127.0.0.1:$(docker compose port kong 8000 | sed 's/.*://')"
 ```
 
 Service URLs:
 
-- Kong gateway: `http://127.0.0.1:8000`
-- API service direct port: `http://127.0.0.1:3000`
-- DeepSeek example service: `http://127.0.0.1:3021`
-- Supabase REST: `http://127.0.0.1:8000/rest/v1`
-- Supabase Auth: `http://127.0.0.1:8000/auth/v1`
-- Supabase Storage: `http://127.0.0.1:8000/storage/v1`
+- Kong gateway: `$API_BASE_URL`
+- API service: `$API_BASE_URL/api`
+- DeepSeek example service: `$API_BASE_URL/deepseek/v1`
+- Supabase REST: `$API_BASE_URL/rest/v1`
+- Supabase Auth: `$API_BASE_URL/auth/v1`
+- Supabase Storage: `$API_BASE_URL/storage/v1`
 
 Useful checks:
 
 ```bash
-curl http://127.0.0.1:8000/api/health
-curl http://127.0.0.1:8000/api/ping
-curl http://127.0.0.1:3021/health
-curl -X POST http://127.0.0.1:8000/deepseek/v1/chat \
+API_BASE_URL="http://127.0.0.1:$(docker compose port kong 8000 | sed 's/.*://')"
+curl "$API_BASE_URL/api/health"
+curl "$API_BASE_URL/api/ping"
+curl -X POST "$API_BASE_URL/deepseek/v1/chat" \
   -H 'content-type: application/json' \
   -d '{"message":"hello"}'
 ```

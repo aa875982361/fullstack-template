@@ -57,13 +57,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REMOTE="$SERVER_USER@$SERVER_HOST"
 SSH_OPTS=(-i "$SSH_KEY_PATH" -o StrictHostKeyChecking=accept-new)
+SCP_OPTS=(-O "${SSH_OPTS[@]}")
 
 ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH'"
-scp "${SSH_OPTS[@]}" "$SERVER_DIR/docker-compose.yml" "$REMOTE:$SERVER_PATH/docker-compose.yml"
+scp "${SCP_OPTS[@]}" "$SERVER_DIR/docker-compose.yml" "$REMOTE:$SERVER_PATH/docker-compose.yml"
 ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH/volumes'"
-scp -r "${SSH_OPTS[@]}" "$SERVER_DIR/volumes/api" "$SERVER_DIR/volumes/db" "$REMOTE:$SERVER_PATH/volumes/"
+scp -r "${SCP_OPTS[@]}" "$SERVER_DIR/volumes/api" "$SERVER_DIR/volumes/db" "$REMOTE:$SERVER_PATH/volumes/"
 ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH/scripts'"
-scp "${SSH_OPTS[@]}" "$SERVER_DIR/scripts/run-db-patches.sh" "$REMOTE:$SERVER_PATH/scripts/run-db-patches.sh"
+scp "${SCP_OPTS[@]}" "$SERVER_DIR/scripts/run-db-patches.sh" "$REMOTE:$SERVER_PATH/scripts/run-db-patches.sh"
 
 ssh "${SSH_OPTS[@]}" "$REMOTE" "
   set -euo pipefail
