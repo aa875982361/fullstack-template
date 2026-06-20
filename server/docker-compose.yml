@@ -2,12 +2,12 @@ name: lutra-template
 
 services:
   h5:
-    image: ${H5_IMAGE:-nginx:1.27-alpine}
+    build:
+      context: ../frontend
+    image: ${H5_IMAGE:-${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/h5:${IMAGE_TAG:-local}}
     restart: unless-stopped
     ports:
       - "${H5_HTTP_PORT:-10086}:80"
-    volumes:
-      - ./frontend/html:/usr/share/nginx/html:ro
     environment:
       TZ: Asia/Shanghai
 

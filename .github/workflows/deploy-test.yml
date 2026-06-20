@@ -56,7 +56,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: printf '%s' "$GITHUB_TOKEN" | docker login "$IMAGE_REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
 
-      - name: Build and push backend images
+      - name: Build and push application images
         working-directory: server
         run: bash scripts/build-images.sh --version "$VERSION" --push
 

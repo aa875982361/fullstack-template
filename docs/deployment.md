@@ -43,7 +43,7 @@ Mini program:
 - Docker Compose v2
 - SSH access for the GitHub Actions deploy key
 
-The remote deploy script uploads compose files, the H5 static build output, and pulls images from the configured registry.
+The remote deploy script uploads compose files and pulls backend and H5 images from the configured registry.
 It also uploads `server/volumes`, including Kong and database initialization files required by Supabase.
 After containers are started, it automatically runs `server/scripts/run-db-patches.sh`.
 

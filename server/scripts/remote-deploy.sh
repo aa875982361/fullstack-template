@@ -60,16 +60,9 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_DIR="$(cd "$SERVER_DIR/.." && pwd)"
-FRONTEND_HTML_DIR="${FRONTEND_HTML_DIR:-$REPO_DIR/frontend/html}"
 REMOTE="$SERVER_USER@$SERVER_HOST"
 SSH_OPTS=(-i "$SSH_KEY_PATH" -o StrictHostKeyChecking=accept-new)
 SCP_OPTS=(-O "${SSH_OPTS[@]}")
-
-if [[ ! -d "$FRONTEND_HTML_DIR" ]]; then
-  echo "Missing frontend html build output: $FRONTEND_HTML_DIR" >&2
-  exit 1
-fi
 
 ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH'"
 scp "${SCP_OPTS[@]}" "$SERVER_DIR/docker-compose.yml" "$REMOTE:$SERVER_PATH/docker-compose.yml"
@@ -77,8 +70,6 @@ ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH/volumes'"
 scp -r "${SCP_OPTS[@]}" "$SERVER_DIR/volumes/api" "$SERVER_DIR/volumes/db" "$REMOTE:$SERVER_PATH/volumes/"
 ssh "${SSH_OPTS[@]}" "$REMOTE" "mkdir -p '$SERVER_PATH/scripts'"
 scp "${SCP_OPTS[@]}" "$SERVER_DIR/scripts/run-db-patches.sh" "$REMOTE:$SERVER_PATH/scripts/run-db-patches.sh"
-ssh "${SSH_OPTS[@]}" "$REMOTE" "rm -rf '$SERVER_PATH/frontend/html' && mkdir -p '$SERVER_PATH/frontend'"
-scp -r "${SCP_OPTS[@]}" "$FRONTEND_HTML_DIR" "$REMOTE:$SERVER_PATH/frontend/html"
 
 ssh "${SSH_OPTS[@]}" "$REMOTE" "
   set -euo pipefail
