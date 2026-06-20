@@ -3,8 +3,8 @@
 ## Backend
 
 ```bash
+node scripts/create-local-env.mjs
 cd server
-cp ../.env.example .env
 docker compose up -d --build
 ```
 
@@ -45,6 +45,8 @@ The frontend reads these build-time variables:
 
 ## Supabase Keys
 
-The template includes development-only `ANON_KEY`, `SERVICE_ROLE_KEY`, and `JWT_SECRET` values in `.env.example`.
+`.env.example` contains placeholders only, so it is safe to commit to a public repository.
+
+For local development, run `node scripts/create-local-env.mjs` to generate `server/.env` with development-only `ANON_KEY`, `SERVICE_ROLE_KEY`, and `JWT_SECRET` values.
 
 For production, generate a new `JWT_SECRET`, then generate matching anon and service role JWTs before deploying.

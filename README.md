@@ -16,7 +16,7 @@
 ## Quick Start
 
 ```bash
-cp .env.example server/.env
+node scripts/create-local-env.mjs
 
 cd server
 docker compose up -d --build
@@ -47,3 +47,7 @@ Update names, domains, image namespace, app IDs, and server secrets in:
 - `server/docker-compose.yml`
 
 Then push this repository to your own remote.
+
+## Public Repository Safety
+
+`.env.example` intentionally contains placeholders only. Run `node scripts/create-local-env.mjs` to generate a local `server/.env` with development-only Supabase JWTs and passwords. Never commit `server/.env`.
