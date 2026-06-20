@@ -1,5 +1,7 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
 
+const { UnifiedWebpackPluginV5 } = require('weapp-tailwindcss/webpack')
+
 export default defineConfig<'webpack5'>(async () => {
   const config: UserConfigExport<'webpack5'> = {
     projectName: 'lutra-template-frontend',
@@ -14,7 +16,12 @@ export default defineConfig<'webpack5'>(async () => {
     sourceRoot: 'src',
     outputRoot: 'dist',
     framework: 'react',
-    compiler: 'webpack5',
+    compiler: {
+      type: 'webpack5',
+      prebundle: {
+        enable: false,
+      },
+    },
     defineConstants: {
       'process.env.TARO_APP_API_BASE_URL': JSON.stringify(
         process.env.TARO_APP_API_BASE_URL || '',
@@ -24,6 +31,21 @@ export default defineConfig<'webpack5'>(async () => {
       ),
     },
     mini: {
+      webpackChain(chain) {
+        chain.merge({
+          plugin: {
+            install: {
+              plugin: UnifiedWebpackPluginV5,
+              args: [
+                {
+                  appType: 'taro',
+                  rem2rpx: true,
+                },
+              ],
+            },
+          },
+        })
+      },
       postcss: {
         pxtransform: {
           enable: true,
@@ -53,4 +75,3 @@ export default defineConfig<'webpack5'>(async () => {
 
   return config
 })
-
