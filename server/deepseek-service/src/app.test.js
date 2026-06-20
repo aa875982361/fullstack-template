@@ -1,6 +1,31 @@
 const assert = require('node:assert/strict')
 const test = require('node:test')
+
+process.env.SUPABASE_URL = 'http://auth.local'
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key'
+
 const app = require('./app')
+const originalFetch = global.fetch
+
+function withMockAuth(handler) {
+  global.fetch = async (url, options) => {
+    if (String(url) === 'http://auth.local/auth/v1/user') {
+      assert.equal(options.headers.apikey, 'service-role-key')
+      assert.equal(options.headers.authorization, 'Bearer valid-token')
+
+      return new Response(JSON.stringify({ id: 'user-id' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    }
+
+    return originalFetch(url, options)
+  }
+
+  return handler().finally(() => {
+    global.fetch = originalFetch
+  })
+}
 
 test('GET /health returns mock mode without API key', async () => {
   const server = app.listen(0)
@@ -18,7 +43,7 @@ test('GET /health returns mock mode without API key', async () => {
   }
 })
 
-test('POST /api/deepseek/chat returns mock reply without API key', async () => {
+test('POST /api/deepseek/chat returns 401 without login', async () => {
   const server = app.listen(0)
   const { port } = server.address()
 
@@ -32,12 +57,36 @@ test('POST /api/deepseek/chat returns mock reply without API key', async () => {
     })
     const data = await response.json()
 
-    assert.equal(response.status, 200)
-    assert.equal(data.provider, 'deepseek')
-    assert.equal(data.mode, 'mock')
-    assert.match(data.reply, /hello/)
+    assert.equal(response.status, 401)
+    assert.equal(data.error, 'unauthorized')
   } finally {
     server.close()
   }
+})
+
+test('POST /api/deepseek/chat returns mock reply for logged-in user without API key', async () => {
+  await withMockAuth(async () => {
+    const server = app.listen(0)
+    const { port } = server.address()
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/api/deepseek/chat`, {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer valid-token',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ message: 'hello' }),
+      })
+      const data = await response.json()
+
+      assert.equal(response.status, 200)
+      assert.equal(data.provider, 'deepseek')
+      assert.equal(data.mode, 'mock')
+      assert.match(data.reply, /hello/)
+    } finally {
+      server.close()
+    }
+  })
 })
 

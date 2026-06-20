@@ -13,6 +13,8 @@ const port = Number(process.env.PORT || process.env.DEEPSEEK_PORT || 3021)
 const apiKey = process.env.DEEPSEEK_API_KEY || ''
 const baseURL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com'
 const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
 app.use(helmet())
 app.use(compression())
@@ -30,7 +32,55 @@ app.get('/health', (req, res) => {
   })
 })
 
-app.post('/api/deepseek/chat', async (req, res, next) => {
+function sendUnauthorized(res) {
+  return res.status(401).json({
+    error: 'unauthorized',
+    message: 'Login required to use DeepSeek.',
+  })
+}
+
+async function requireAuthenticatedUser(req, res, next) {
+  try {
+    const authHeader = req.get('authorization') || ''
+    const match = authHeader.match(/^Bearer\s+(.+)$/i)
+
+    if (!match) {
+      return sendUnauthorized(res)
+    }
+
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      return res.status(500).json({
+        error: 'auth_not_configured',
+        message: 'Supabase auth configuration is missing.',
+      })
+    }
+
+    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseServiceRoleKey,
+        authorization: `Bearer ${match[1]}`,
+      },
+    })
+
+    if (response.status === 401 || response.status === 403) {
+      return sendUnauthorized(res)
+    }
+
+    if (!response.ok) {
+      return res.status(502).json({
+        error: 'auth_service_unavailable',
+        message: 'Unable to verify login status.',
+      })
+    }
+
+    req.user = await response.json()
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
+app.post('/api/deepseek/chat', requireAuthenticatedUser, async (req, res, next) => {
   try {
     const message = String(req.body?.message || '').trim()
 
