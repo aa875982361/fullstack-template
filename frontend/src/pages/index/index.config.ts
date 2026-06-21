@@ -1,4 +1,4 @@
 export default definePageConfig({
-  navigationBarTitleText: 'Lutra Template',
+  navigationBarTitleText: '情绪回声',
 })
 

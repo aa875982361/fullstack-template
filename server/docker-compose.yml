@@ -44,6 +44,8 @@ services:
         condition: service_healthy
       image-service:
         condition: service_healthy
+      social-service:
+        condition: service_healthy
 
   auth:
     image: ${SUPABASE_AUTH_IMAGE:-supabase/gotrue:v2.180.0}
@@ -258,6 +260,28 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3022/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  social-service:
+    build:
+      context: ./social-service
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
+    image: ${IMAGE_REGISTRY:-local}/${IMAGE_NAMESPACE:-lutra-template}/social-service:${IMAGE_TAG:-local}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3023
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3023/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

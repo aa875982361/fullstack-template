@@ -33,7 +33,90 @@ export type ImageGenerationResponse = {
   }>
 }
 
-function getAccessToken() {
+export type EmotionAnalysis = {
+  primaryEmotion: string
+  mixedEmotions: Array<{
+    label: string
+    score: number
+  }>
+  intensity: number
+  valence: number
+  arousal: number
+  tendency: string
+  confidence: number
+  empathyMessage: string
+}
+
+export type AnalyzeEmotionResponse = {
+  analysis: EmotionAnalysis
+  provider: string
+  mode: string
+}
+
+export type AnonymousProfile = {
+  displayName?: string
+  avatarSeed?: string
+}
+
+export type ChatRoomMember = {
+  roomId: string
+  userId: string
+  anonymousName: string
+  avatarSeed: string
+  emotionRecordId?: string
+  joinedAt: string
+  leftAt?: string
+}
+
+export type ChatRoom = {
+  id: string
+  status: 'active' | 'closed'
+  emotionSummary: Record<string, unknown>
+  createdAt: string
+  closedAt?: string
+  currentUserId?: string
+  members: ChatRoomMember[]
+}
+
+export type MatchResponse = {
+  status: 'queued' | 'matched'
+  analysis: EmotionAnalysis
+  emotionRecordId: string
+  queueId?: string
+  profile?: AnonymousProfile
+  room?: ChatRoom
+}
+
+export type CurrentMatchResponse =
+  | {
+      status: 'idle'
+    }
+  | {
+      status: 'queued'
+      queueId: string
+      emotionRecordId: string
+      createdAt: string
+    }
+  | {
+      status: 'matched'
+      queueId: string
+      room: ChatRoom
+    }
+
+export type ChatMessage = {
+  id: string
+  roomId: string
+  senderId: string
+  senderAlias: string
+  content: string
+  createdAt: string
+}
+
+export type RoomMessagesResponse = {
+  messages: ChatMessage[]
+}
+
+export function getAccessToken() {
   return Taro.getStorageSync<string>(AUTH_TOKEN_KEY)
 }
 
@@ -167,6 +250,70 @@ export async function generateImage(prompt: string) {
       watermark: true,
     },
   })
+}
+
+export async function analyzeEmotion(text: string) {
+  return requestApi<AnalyzeEmotionResponse>('/social/v1/emotions/analyze', {
+    method: 'POST',
+    header: {
+      'content-type': 'application/json',
+    },
+    data: {
+      text,
+    },
+  })
+}
+
+export async function joinEmotionMatch(text: string, analysis?: EmotionAnalysis) {
+  return requestApi<MatchResponse>('/social/v1/matches/join', {
+    method: 'POST',
+    header: {
+      'content-type': 'application/json',
+    },
+    data: {
+      text,
+      ...(analysis ? { analysis } : {}),
+    },
+  })
+}
+
+export async function getCurrentMatch() {
+  return requestApi<CurrentMatchResponse>('/social/v1/matches/current', {
+    method: 'GET',
+  })
+}
+
+export async function getRoomMessages(roomId: string) {
+  return requestApi<RoomMessagesResponse>(
+    `/social/v1/rooms/${encodeURIComponent(roomId)}/messages`,
+    {
+      method: 'GET',
+    },
+  )
+}
+
+export async function sendRoomMessage(roomId: string, content: string) {
+  return requestApi<{ message: ChatMessage }>(
+    `/social/v1/rooms/${encodeURIComponent(roomId)}/messages`,
+    {
+      method: 'POST',
+      header: {
+        'content-type': 'application/json',
+      },
+      data: {
+        content,
+      },
+    },
+  )
+}
+
+export async function leaveRoom(roomId: string) {
+  return requestApi<{ ok: boolean }>(
+    `/social/v1/rooms/${encodeURIComponent(roomId)}/leave`,
+    {
+      method: 'POST',
+    },
+  )
 }
 
 export async function signInWithEmail(email: string, password: string) {
