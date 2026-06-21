@@ -21,6 +21,18 @@ type AuthResponse = {
   message?: string
 }
 
+export type ImageGenerationResponse = {
+  provider?: string
+  mode?: string
+  model?: string
+  created?: number
+  data?: Array<{
+    url?: string
+    b64_json?: string
+    revised_prompt?: string
+  }>
+}
+
 function getAccessToken() {
   return Taro.getStorageSync<string>(AUTH_TOKEN_KEY)
 }
@@ -136,6 +148,23 @@ export async function sendDeepSeekMessage(message: string) {
     },
     data: {
       message,
+    },
+  })
+}
+
+export async function generateImage(prompt: string) {
+  return requestApi<ImageGenerationResponse>('/images/v1/generations', {
+    method: 'POST',
+    header: {
+      'content-type': 'application/json',
+    },
+    data: {
+      prompt,
+      sequential_image_generation: 'disabled',
+      response_format: 'url',
+      size: '2K',
+      stream: false,
+      watermark: true,
     },
   })
 }

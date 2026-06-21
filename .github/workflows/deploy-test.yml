@@ -30,6 +30,7 @@ jobs:
         env:
           TARO_APP_API_BASE_URL: ${{ secrets.TEST_API_BASE_URL }}
           TARO_APP_H5_BASE_URL: ${{ secrets.TEST_H5_BASE_URL }}
+          TARO_APP_SUPABASE_ANON_KEY: ${{ vars.TEST_SUPABASE_ANON_KEY || secrets.TEST_SUPABASE_ANON_KEY }}
         run: npm ci --legacy-peer-deps && npm run build:h5:online && npm run build:weapp
 
       - name: Write WeChat upload key

@@ -5,11 +5,11 @@ set -euo pipefail
 VERSION="${VERSION:-}"
 REGISTRY="${IMAGE_REGISTRY:-${REGISTRY:-ghcr.io}}"
 NAMESPACE="${IMAGE_NAMESPACE:-${NAMESPACE:-lutra-template}}"
-SERVICES="${SERVICES:-api-service,deepseek-service,h5}"
+SERVICES="${SERVICES:-api-service,deepseek-service,image-service,h5}"
 PUSH=false
 
 usage() {
-  echo "Usage: $0 --version <tag> [--services api-service,deepseek-service,h5] [--push]"
+  echo "Usage: $0 --version <tag> [--services api-service,deepseek-service,image-service,h5] [--push]"
 }
 
 while [[ $# -gt 0 ]]; do

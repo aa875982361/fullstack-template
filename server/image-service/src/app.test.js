@@ -7,7 +7,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key'
 const app = require('./app')
 const originalFetch = global.fetch
 
-function withMockAuth(handler) {
+function withMockFetch(handler) {
   global.fetch = async (url, options) => {
     if (String(url) === 'http://auth.local/auth/v1/user') {
       assert.equal(options.headers.apikey, 'service-role-key')
@@ -19,12 +19,12 @@ function withMockAuth(handler) {
       })
     }
 
-    return originalFetch(url, options)
+    return handler(url, options)
   }
 
-  return handler().finally(() => {
+  return () => {
     global.fetch = originalFetch
-  })
+  }
 }
 
 test('GET /health returns mock mode without API key', async () => {
@@ -37,23 +37,24 @@ test('GET /health returns mock mode without API key', async () => {
 
     assert.equal(response.status, 200)
     assert.equal(data.ok, true)
-    assert.equal(data.service, 'deepseek-service')
+    assert.equal(data.service, 'image-service')
+    assert.equal(data.provider, 'volcengine-ark')
   } finally {
     server.close()
   }
 })
 
-test('POST /api/deepseek/chat returns 401 without login', async () => {
+test('POST /api/images/generations returns 401 without login', async () => {
   const server = app.listen(0)
   const { port } = server.address()
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/deepseek/chat`, {
+    const response = await fetch(`http://127.0.0.1:${port}/api/images/generations`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify({ message: 'hello' }),
+      body: JSON.stringify({ prompt: 'black hole train' }),
     })
     const data = await response.json()
 
@@ -64,29 +65,30 @@ test('POST /api/deepseek/chat returns 401 without login', async () => {
   }
 })
 
-test('POST /api/deepseek/chat returns mock reply for logged-in user without API key', async () => {
-  await withMockAuth(async () => {
-    const server = app.listen(0)
-    const { port } = server.address()
+test('POST /api/images/generations returns mock image for logged-in user without API key', async () => {
+  const restoreFetch = withMockFetch((url, options) => originalFetch(url, options))
+  const server = app.listen(0)
+  const { port } = server.address()
 
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/api/deepseek/chat`, {
-        method: 'POST',
-        headers: {
-          authorization: 'Bearer valid-token',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ message: 'hello' }),
-      })
-      const data = await response.json()
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/images/generations`, {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer valid-token',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: 'black hole train' }),
+    })
+    const data = await response.json()
 
-      assert.equal(response.status, 200)
-      assert.equal(data.provider, 'deepseek')
-      assert.equal(data.mode, 'mock')
-      assert.match(data.reply, /hello/)
-    } finally {
-      server.close()
-    }
-  })
+    assert.equal(response.status, 200)
+    assert.equal(data.provider, 'volcengine-ark')
+    assert.equal(data.mode, 'mock')
+    assert.equal(data.model, 'doubao-seedream-5-0-260128')
+    assert.match(data.data[0].revised_prompt, /black hole train/)
+  } finally {
+    server.close()
+    restoreFetch()
+  }
 })
 

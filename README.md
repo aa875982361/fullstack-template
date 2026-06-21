@@ -7,6 +7,7 @@
 - `frontend/`: Taro 4 + React + TypeScript，可构建微信小程序和 H5。
 - `server/api-service/`: 主 API 服务，提供健康检查和网关示例。
 - `server/deepseek-service/`: 示例 AI 微服务，没有配置 API Key 时自动返回 mock 结果。
+- `server/image-service/`: 火山方舟文生图微服务，调用前会校验 Supabase 登录态。
 - `server/volumes/api/kong.yml`: Kong 网关，统一暴露 Supabase 和业务服务。
 - Supabase self-hosted services: Kong, Auth, REST, Realtime, Storage, Postgres.
 - `server/scripts/run-db-patches.sh`: 自动执行可重复运行的数据库补丁。
@@ -32,6 +33,10 @@ curl "$API_BASE_URL/api/health"
 curl -X POST "$API_BASE_URL/deepseek/v1/chat" \
   -H 'content-type: application/json' \
   -d '{"message":"hello"}'
+curl -X POST "$API_BASE_URL/images/v1/generations" \
+  -H 'authorization: Bearer <access-token>' \
+  -H 'content-type: application/json' \
+  -d '{"prompt":"星际穿越，黑洞，复古列车，电影大片"}'
 ```
 
 ## Branch Flow
