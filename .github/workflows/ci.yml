@@ -54,6 +54,9 @@ jobs:
       - name: Test deepseek-service
         working-directory: server/deepseek-service
         run: npm install && npm test
+      - name: Test social-service
+        working-directory: server/social-service
+        run: npm install && npm test
       - name: Build Docker images
         working-directory: server
-        run: bash scripts/build-images.sh --version "ci-${{ github.sha }}" --services api-service,deepseek-service
+        run: bash scripts/build-images.sh --version "ci-${{ github.sha }}" --services api-service,deepseek-service,social-service
